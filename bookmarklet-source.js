@@ -119,6 +119,15 @@
     style.textContent = getStyles();
     document.head.appendChild(style);
 
+    // === INJECT FONT AWESOME ===
+    if (!document.getElementById('approval-ui-fa')) {
+        var fa = document.createElement('link');
+        fa.id = 'approval-ui-fa';
+        fa.rel = 'stylesheet';
+        fa.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css';
+        document.head.appendChild(fa);
+    }
+
     // === RENDER ===
     renderApprovalUI();
 
@@ -133,9 +142,9 @@
         html += '<div class="bm-modal-header">';
         html += '<div class="bm-modal-title"><h2>Approval Image - Batch Generation</h2><span class="bm-badge-pending" id="bmHeaderBadge">Pending</span></div>';
         html += '<div class="bm-modal-header-right">';
-        html += '<div class="bm-notif-bell" id="bmNotifBell"><span>\u{1F514}</span><span class="bm-notif-badge hidden" id="bmNotifBadge">0</span></div>';
+        html += '<div class="bm-notif-bell" id="bmNotifBell"><span><i class="fa-solid fa-bell"></i></span><span class="bm-notif-badge hidden" id="bmNotifBadge">0</span></div>';
         html += '<span class="bm-role-tag approver" id="bmRoleTag">APPROVER</span>';
-        html += '<button class="bm-close-btn" id="bmCloseBtn" title="Close">\u2715</button>';
+        html += '<button class="bm-close-btn" id="bmCloseBtn" title="Close"><i class="fa-solid fa-xmark"></i></button>';
         html += '</div></div>';
 
         // Notification panel
@@ -156,21 +165,21 @@
             html += '<div class="bm-img-placeholder">NO MEDIA DETECTED \u2014 Click bookmarklet while viewing an image or video</div>';
         }
         html += '<div class="bm-toolbar">';
-        html += '<button>\u2B07 Download</button><button>\u{1F4CB} Copy</button>';
-        html += '<button>\u2B06 Upscale</button><button>\u{1F5DC} Compress</button>';
-        html += '<button>\u270F\uFE0F Edit</button><button>\u2702\uFE0F Crop</button>';
+        html += '<button><i class="fa-solid fa-download"></i> Download</button><button><i class="fa-regular fa-copy"></i> Copy</button>';
+        html += '<button><i class="fa-solid fa-up-right-and-down-left-from-center"></i> Upscale</button><button><i class="fa-solid fa-compress"></i> Compress</button>';
+        html += '<button><i class="fa-solid fa-pen"></i> Edit</button><button><i class="fa-solid fa-crop-simple"></i> Crop</button>';
         html += '</div>';
 
         // Approve/Reject buttons below toolbar
         html += '<div class="bm-actions" id="bmActions">';
-        html += '<button class="bm-btn-approve" id="bmBtnApprove">\u2713 Re-approve</button>';
-        html += '<button class="bm-btn-reject" id="bmBtnReject">\u2717 Reject</button></div>';
+        html += '<button class="bm-btn-approve" id="bmBtnApprove"><i class="fa-solid fa-check"></i> Re-approve</button>';
+        html += '<button class="bm-btn-reject" id="bmBtnReject"><i class="fa-solid fa-xmark"></i> Reject</button></div>';
         html += '<div class="bm-status" id="bmStatus"><span class="bm-status-text" id="bmStatusText"></span>';
-        html += '<button class="bm-btn-undo" id="bmBtnUndo">\u21A9 Undo</button></div>';
+        html += '<button class="bm-btn-undo" id="bmBtnUndo"><i class="fa-solid fa-rotate-left"></i> Undo</button></div>';
 
         // Image metadata
         html += '<div class="bm-meta-row">';
-        html += '<span class="bm-label">\u2728 Source:</span><span class="bm-value bm-value-link">Batch Generation</span>';
+        html += '<span class="bm-label"><i class="fa-solid fa-sparkles"></i> Source:</span><span class="bm-value bm-value-link">Batch Generation</span>';
         html += '<span class="bm-label">by</span><span class="bm-value">' + IMAGE_OWNER + '</span>';
         html += '</div>';
         html += '</div>';
@@ -179,7 +188,7 @@
         html += '<div class="bm-modal-right">';
         html += '<div class="bm-comments-header"><h3>Comments</h3>';
         html += '<span class="bm-comment-count" id="bmCommentCount" style="display:none">0</span></div>';
-        html += '<div class="bm-comments-list" id="bmCommentsList"><div class="bm-no-comments"><div class="bm-no-comments-icon">\u{1F4AC}</div><p>No comments yet</p><small>Be the first to add a comment.</small></div></div>';
+        html += '<div class="bm-comments-list" id="bmCommentsList"><div class="bm-no-comments"><div class="bm-no-comments-icon"><i class="fa-regular fa-comments"></i></div><p>No comments yet</p><small>Be the first to add a comment.</small></div></div>';
         html += '<div class="bm-comment-input" id="bmCommentInput">';
         html += '<input type="text" placeholder="Add a comment..." id="bmMainInput" />';
         html += '<button class="bm-btn-post" id="bmBtnPost">Add Comment</button></div>';
@@ -219,10 +228,10 @@
         function sendNotification(type, fromUser, message, targetUser) {
             if (fromUser === targetUser) return;
             var timeStr = new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
-            var icon = '\u{1F4AC}', toastClass = 'bm-toast-comment';
-            if (type === 'approve') { icon = '\u2705'; toastClass = 'bm-toast-approve'; }
-            else if (type === 'reject') { icon = '\u274C'; toastClass = 'bm-toast-reject'; }
-            else if (type === 'reply') { icon = '\u21A9\uFE0F'; toastClass = 'bm-toast-reply'; }
+            var icon = '<i class="fa-regular fa-comment"></i>', toastClass = 'bm-toast-comment';
+            if (type === 'approve') { icon = '<i class="fa-solid fa-circle-check"></i>'; toastClass = 'bm-toast-approve'; }
+            else if (type === 'reject') { icon = '<i class="fa-solid fa-circle-xmark"></i>'; toastClass = 'bm-toast-reject'; }
+            else if (type === 'reply') { icon = '<i class="fa-solid fa-reply"></i>'; toastClass = 'bm-toast-reply'; }
             var n = {type:type, user:fromUser, message:message, time:timeStr, icon:icon, read:false, toastClass:toastClass};
             if (!notificationsMap[targetUser]) notificationsMap[targetUser] = [];
             notificationsMap[targetUser].unshift(n);
@@ -351,7 +360,7 @@
         var hb = document.getElementById('bmHeaderBadge');
 
         ba.addEventListener('click', function() {
-            st.textContent = '\u2713 Image Approved'; st.className = 'bm-status-text approved';
+            st.innerHTML = '<i class="fa-solid fa-check"></i> Image Approved'; st.className = 'bm-status-text approved';
             sm.classList.add('visible'); ba.disabled = br.disabled = true;
             ba.style.opacity = br.style.opacity = '0.5'; ba.style.cursor = br.style.cursor = 'not-allowed';
             hb.textContent = 'Approved'; hb.style.background = '#1e7a35';
@@ -359,7 +368,7 @@
             sendNotification('approve', currentUser.email, 'approved the image', RETOUCHER_EMAIL);
         });
         br.addEventListener('click', function() {
-            st.textContent = '\u2717 Image Rejected'; st.className = 'bm-status-text rejected';
+            st.innerHTML = '<i class="fa-solid fa-xmark"></i> Image Rejected'; st.className = 'bm-status-text rejected';
             sm.classList.add('visible'); ba.disabled = br.disabled = true;
             ba.style.opacity = br.style.opacity = '0.5'; ba.style.cursor = br.style.cursor = 'not-allowed';
             hb.textContent = 'Rejected'; hb.style.background = '#c53030';
@@ -442,8 +451,8 @@
         + '.bm-toolbar button:hover{background:#1a2540}'
         + '.bm-actions{display:flex;gap:12px;justify-content:center;padding:10px 0 !important}'
         + '.bm-actions.hidden{display:none}'
-        + '.bm-btn-approve{background:#1e7a35;color:#fff;border:none;padding:10px 24px !important;border-radius:5px;font-size:12px;font-weight:600;cursor:pointer}'
-        + '.bm-btn-reject{background:#c53030;color:#fff;border:none;padding:10px 24px !important;border-radius:5px;font-size:12px;font-weight:600;cursor:pointer}'
+        + '.bm-btn-approve{background:#1e7a35;color:#fff;border:none;padding:10px 16px !important;border-radius:5px;font-size:12px;font-weight:600;cursor:pointer}'
+        + '.bm-btn-reject{background:#c53030;color:#fff;border:none;padding:10px 16px !important;border-radius:5px;font-size:12px;font-weight:600;cursor:pointer}'
         + '.bm-status{display:none;align-items:center;justify-content:center;gap:12px}'
         + '.bm-status.visible{display:flex}'
         + '.bm-btn-undo{background:#1a2540;color:#b0bdd0;border:1px solid #2a3a50;padding:4px 10px;border-radius:4px;font-size:10px;cursor:pointer}'
@@ -527,7 +536,7 @@
         + '.bm-role-switcher{display:flex;align-items:center;gap:6px}'
         + '.bm-role-switcher label{font-size:9px;color:#3a4a5e;text-transform:uppercase;letter-spacing:.5px}'
         + '.bm-role-buttons{display:flex;gap:2px;background:#080d1a;border-radius:4px;padding:2px}'
-        + '.bm-role-btn{padding:4px 8px;border:none;border-radius:3px;font-size:10px;cursor:pointer;background:transparent;color:#6b7a8f}'
+        + '.bm-role-btn{padding:6px 12px;border:none;border-radius:3px;font-size:10px;cursor:pointer;background:transparent;color:#6b7a8f}'
         + '.bm-role-btn.active{background:#2563a8;color:#fff}'
         + '.bm-switch-info{font-size:10px;color:#3a4a5e;margin-left:auto}'
         + '.bm-switch-info #bmSwitchEmail{color:#5b9cf6;font-weight:500}';
