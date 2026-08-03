@@ -35,6 +35,47 @@
         'jstereoyu@mosaicslom.com': 0, 'packuser@mosaicslom.com': 0
     };
 
+    // === DETECT IMAGE FROM UNDERLYING PAGE ===
+    var detectedImageUrl = '';
+    (function detectImage() {
+        // Strategy 1: Look for a large visible <img> on the page (likely the approval image)
+        var imgs = document.querySelectorAll('img');
+        var bestImg = null, bestArea = 0;
+        imgs.forEach(function(img) {
+            var rect = img.getBoundingClientRect();
+            var area = rect.width * rect.height;
+            if (area > bestArea && rect.width > 150 && rect.height > 150 && img.src && !img.src.includes('avatar') && !img.src.includes('icon') && !img.src.includes('logo')) {
+                bestArea = area; bestImg = img;
+            }
+        });
+        if (bestImg && bestImg.src) { detectedImageUrl = bestImg.src; return; }
+
+        // Strategy 2: Look for divs with background-image (common for image viewers)
+        var divs = document.querySelectorAll('div');
+        divs.forEach(function(div) {
+            if (detectedImageUrl) return;
+            var bg = window.getComputedStyle(div).backgroundImage;
+            if (bg && bg !== 'none' && bg.indexOf('url(') !== -1) {
+                var rect = div.getBoundingClientRect();
+                if (rect.width > 200 && rect.height > 200) {
+                    detectedImageUrl = bg.replace(/^url\(["']?/, '').replace(/["']?\)$/, '');
+                }
+            }
+        });
+
+        // Strategy 3: Look for canvas elements (some viewers render to canvas)
+        if (!detectedImageUrl) {
+            var canvases = document.querySelectorAll('canvas');
+            canvases.forEach(function(canvas) {
+                if (detectedImageUrl) return;
+                var rect = canvas.getBoundingClientRect();
+                if (rect.width > 200 && rect.height > 200) {
+                    try { detectedImageUrl = canvas.toDataURL(); } catch(e) {}
+                }
+            });
+        }
+    })();
+
     // === CREATE OVERLAY ===
     var overlay = document.createElement('div');
     overlay.id = 'approval-ui-overlay';
@@ -82,7 +123,11 @@
 
         // Main content
         html += '<div class="bm-main"><div class="bm-canvas">';
-        html += '<div class="bm-img-placeholder">PLACEHOLDER IMAGE</div>';
+        if (detectedImageUrl) {
+            html += '<img class="bm-img-actual" src="' + detectedImageUrl + '" alt="Image for approval" />';
+        } else {
+            html += '<div class="bm-img-placeholder">NO IMAGE DETECTED \u2014 Click bookmarklet while viewing an image</div>';
+        }
         html += '<div class="bm-toolbar">';
         html += '<button>\u2B07 Download</button><button>\u{1F4CB} Copy</button>';
         html += '<button>\u2B06 Upscale</button><button>\u{1F5DC} Compress</button>';
@@ -395,6 +440,7 @@
         + '.bm-main{display:flex;flex:1;padding:0 20px 20px;gap:20px}'
         + '.bm-canvas{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px}'
         + '.bm-img-placeholder{width:100%;max-width:600px;height:380px;background:#040610;border:1px solid #1a2436;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#3a4a5e;font-size:14px;letter-spacing:2px}'
+        + '.bm-img-actual{max-width:100%;max-height:500px;border-radius:8px;border:1px solid #1a2436;object-fit:contain}'
         + '.bm-toolbar{display:flex;gap:6px}'
         + '.bm-toolbar button{background:#0d1424;border:1px solid #1a2436;color:#b0bdd0;padding:6px 12px;border-radius:5px;font-size:12px;cursor:pointer}'
         + '.bm-toolbar button:hover{background:#162035}'
