@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Install Approval System Bookmarklet</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #0e1525; color: #c5d0dc; min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center; padding: 60px 24px;
+}
+h1 { font-size: 28px; color: #fff; margin-bottom: 8px; }
+.subtitle { color: #7a8a9e; margin-bottom: 40px; font-size: 15px; }
+.install-card {
+    background: #131b2b; border: 1px solid #1e2a3d; border-radius: 12px;
+    padding: 32px; max-width: 560px; width: 100%;
+}
+.install-card h2 { font-size: 18px; color: #fff; margin-bottom: 16px; }
+.step { display: flex; gap: 12px; margin-bottom: 20px; }
+.step-num {
+    width: 28px; height: 28px; border-radius: 50%; background: #2563eb;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 600; color: #fff; flex-shrink: 0;
+}
+.step-text { font-size: 14px; line-height: 1.6; }
+.step-text strong { color: #fff; }
+.bookmarklet-link {
+    display: inline-block; margin: 24px 0; padding: 14px 28px;
+    background: #2563eb; color: #fff; border-radius: 8px;
+    text-decoration: none; font-size: 16px; font-weight: 600;
+    cursor: grab; transition: all 0.2s;
+    box-shadow: 0 4px 16px rgba(37,99,235,0.3);
+}
+.bookmarklet-link:hover { background: #3b7ff6; transform: translateY(-1px); }
+.bookmarklet-link:active { cursor: grabbing; }
+.note {
+    margin-top: 24px; padding: 12px 16px; background: #1a2540;
+    border-radius: 6px; font-size: 12px; color: #7a8a9e; line-height: 1.5;
+}
+.note strong { color: #e8893a; }
+.alt-section { margin-top: 32px; max-width: 560px; width: 100%; }
+.alt-section h3 { font-size: 15px; color: #fff; margin-bottom: 12px; }
+.code-box {
+    background: #080d1a; border: 1px solid #1e2a3d; border-radius: 8px;
+    padding: 16px; font-family: 'SF Mono', Monaco, monospace; font-size: 11px;
+    color: #4dd6a5; word-break: break-all; line-height: 1.4;
+    max-height: 120px; overflow-y: auto; cursor: text; user-select: all;
+}
+.copy-btn {
+    margin-top: 8px; background: #1a2540; border: 1px solid #1e2a3d;
+    color: #c5d0dc; padding: 6px 14px; border-radius: 4px; font-size: 12px;
+    cursor: pointer;
+}
+.copy-btn:hover { background: #243352; }
+</style>
+</head>
+<body>
+<h1>⚡ Approval System UI</h1>
+<p class="subtitle">Install the bookmarklet to inject the new approval interface into Workbench</p>
+
+<div class="install-card">
+    <h2>Installation</h2>
+    <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-text"><strong>Show your bookmarks bar</strong> (Cmd+Shift+B on Mac, Ctrl+Shift+B on Windows)</div>
+    </div>
+    <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-text"><strong>Drag the button below</strong> to your bookmarks bar</div>
+    </div>
+    <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-text"><strong>Navigate to Workbench</strong> and click the bookmarklet to activate the new approval UI</div>
+    </div>
+
+    <!-- The actual bookmarklet link — drag this to bookmarks bar -->
+    <a class="bookmarklet-link" href="javascript:void((function(){if(document.getElementById('approval-ui-overlay')){document.getElementById('approval-ui-overlay').remove();return;}var s=document.createElement('script');s.id='approval-ui-script';s.src='bookmarklet-source.js';document.body.appendChild(s);})())">
+        ⚡ Approval System UI
+    </a>
+
+    <div class="note">
+        <strong>Note:</strong> After installing, go to <code>https://workbench.mosaic.amazon.dev/</code> and click the bookmark. The new Approval System UI will appear as an overlay. Click the &times; button to dismiss it.
+    </div>
+</div>
+
+<div class="alt-section">
+    <h3>Alternative: Manual Install</h3>
+    <p style="font-size:13px;color:#7a8a9e;margin-bottom:12px">Create a new bookmark and paste this as the URL:</p>
+    <div class="code-box" id="codeBox">javascript:void((function(){if(document.getElementById('approval-ui-overlay')){document.getElementById('approval-ui-overlay').remove();return;}var s=document.createElement('script');s.id='approval-ui-script';s.src='bookmarklet-source.js';document.body.appendChild(s);})())</div>
+    <button class="copy-btn" onclick="navigator.clipboard.writeText(document.getElementById('codeBox').textContent);this.textContent='Copied!';setTimeout(()=>this.textContent='Copy to clipboard',2000)">Copy to clipboard</button>
+</div>
+
+<script>
+// Prevent the bookmarklet link from navigating when clicked (it should only be dragged)
+document.querySelector('.bookmarklet-link').addEventListener('click', function(e) {
+    e.preventDefault();
+    alert('Drag this button to your bookmarks bar to install it!');
+});
+</script>
+</body>
+</html>
