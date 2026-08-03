@@ -119,13 +119,22 @@
     style.textContent = getStyles();
     document.head.appendChild(style);
 
-    // === INJECT FONT AWESOME ===
-    if (!document.getElementById('approval-ui-fa')) {
-        var fa = document.createElement('link');
-        fa.id = 'approval-ui-fa';
-        fa.rel = 'stylesheet';
-        fa.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css';
-        document.head.appendChild(fa);
+    // === INJECT FONT AWESOME (dual approach for CSP compatibility) ===
+    if (!document.getElementById('approval-ui-fa-css')) {
+        var faCSS = document.createElement('link');
+        faCSS.id = 'approval-ui-fa-css';
+        faCSS.rel = 'stylesheet';
+        faCSS.crossOrigin = 'anonymous';
+        faCSS.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css';
+        faCSS.integrity = '';
+        document.head.appendChild(faCSS);
+    }
+    if (!document.getElementById('approval-ui-fa-js')) {
+        var faJS = document.createElement('script');
+        faJS.id = 'approval-ui-fa-js';
+        faJS.src = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/js/all.min.js';
+        faJS.crossOrigin = 'anonymous';
+        document.head.appendChild(faJS);
     }
 
     // === RENDER ===
