@@ -35,10 +35,41 @@
         'jstereoyu@mosaicslom.com': 0, 'packuser@mosaicslom.com': 0
     };
 
-    // === DETECT IMAGE FROM UNDERLYING PAGE ===
+    // === DETECT IMAGE OR VIDEO FROM UNDERLYING PAGE ===
     var detectedImageUrl = '';
-    (function detectImage() {
-        // Strategy 1: Look for a large visible <img> on the page (likely the approval image)
+    var detectedVideoUrl = '';
+    (function detectMedia() {
+        // Strategy 0: Look for <video> elements (highest priority)
+        var videos = document.querySelectorAll('video');
+        videos.forEach(function(video) {
+            if (detectedVideoUrl) return;
+            var rect = video.getBoundingClientRect();
+            if (rect.width > 100 && rect.height > 100) {
+                // Check for src attribute or <source> children
+                if (video.src) { detectedVideoUrl = video.src; return; }
+                var source = video.querySelector('source');
+                if (source && source.src) { detectedVideoUrl = source.src; return; }
+                // Check currentSrc
+                if (video.currentSrc) { detectedVideoUrl = video.currentSrc; }
+            }
+        });
+
+        // Strategy 0b: Look for divs containing video elements
+        if (!detectedVideoUrl) {
+            var divs = document.querySelectorAll('div video, div source');
+            divs.forEach(function(el) {
+                if (detectedVideoUrl) return;
+                var src = el.src || el.currentSrc || '';
+                if (src && (src.includes('.mp4') || src.includes('.webm') || src.includes('.mov') || src.includes('video'))) {
+                    detectedVideoUrl = src;
+                }
+            });
+        }
+
+        // If video found, skip image detection
+        if (detectedVideoUrl) return;
+
+        // Strategy 1: Look for a large visible <img> on the page
         var imgs = document.querySelectorAll('img');
         var bestImg = null, bestArea = 0;
         imgs.forEach(function(img) {
@@ -50,9 +81,9 @@
         });
         if (bestImg && bestImg.src) { detectedImageUrl = bestImg.src; return; }
 
-        // Strategy 2: Look for divs with background-image (common for image viewers)
-        var divs = document.querySelectorAll('div');
-        divs.forEach(function(div) {
+        // Strategy 2: Look for divs with background-image
+        var allDivs = document.querySelectorAll('div');
+        allDivs.forEach(function(div) {
             if (detectedImageUrl) return;
             var bg = window.getComputedStyle(div).backgroundImage;
             if (bg && bg !== 'none' && bg.indexOf('url(') !== -1) {
@@ -63,7 +94,7 @@
             }
         });
 
-        // Strategy 3: Look for canvas elements (some viewers render to canvas)
+        // Strategy 3: Look for canvas elements
         if (!detectedImageUrl) {
             var canvases = document.querySelectorAll('canvas');
             canvases.forEach(function(canvas) {
@@ -115,12 +146,14 @@
         // Modal body: left (image) + right (comments)
         html += '<div class="bm-modal-body">';
 
-        // Left panel: image + toolbar + actions
+        // Left panel: image/video + toolbar + actions
         html += '<div class="bm-modal-left">';
-        if (detectedImageUrl) {
+        if (detectedVideoUrl) {
+            html += '<video class="bm-video-actual" src="' + detectedVideoUrl + '" controls autoplay muted loop>Your browser does not support video.</video>';
+        } else if (detectedImageUrl) {
             html += '<img class="bm-img-actual" src="' + detectedImageUrl + '" alt="Image for approval" />';
         } else {
-            html += '<div class="bm-img-placeholder">NO IMAGE DETECTED \u2014 Click bookmarklet while viewing an image</div>';
+            html += '<div class="bm-img-placeholder">NO MEDIA DETECTED \u2014 Click bookmarklet while viewing an image or video</div>';
         }
         html += '<div class="bm-toolbar">';
         html += '<button>\u2B07 Download</button><button>\u{1F4CB} Copy</button>';
@@ -392,24 +425,25 @@
         return '#approval-ui-overlay *{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}'
         + '#approval-ui-overlay{color:#c5d0dc}'
         + '.bm-modal{background:#1e2a3d;border-radius:12px;width:90%;max-width:900px;max-height:90vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.6);position:relative}'
-        + '.bm-modal-header{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid #2a3a50;background:#1a2540}'
+        + '.bm-modal-header{display:flex;align-items:center;justify-content:space-between;padding:18px 24px;border-bottom:1px solid #2a3a50;background:#1a2540}'
         + '.bm-modal-title{display:flex;align-items:center;gap:10px}'
         + '.bm-modal-title h2{font-size:15px;font-weight:600;color:#e2e8f0}'
         + '.bm-modal-header-right{display:flex;align-items:center;gap:10px}'
         + '.bm-close-btn{background:none;color:#7a8a9e;border:none;width:28px;height:28px;border-radius:50%;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center}'
         + '.bm-close-btn:hover{background:#2a3a50;color:#fff}'
         + '.bm-modal-body{display:flex;flex:1;overflow:hidden}'
-        + '.bm-modal-left{flex:1;display:flex;flex-direction:column;align-items:center;padding:20px;gap:12px;overflow-y:auto;border-right:1px solid #2a3a50}'
-        + '.bm-modal-right{width:280px;display:flex;flex-direction:column;overflow:hidden;background:#131b2b}'
+        + '.bm-modal-left{flex:1;display:flex;flex-direction:column;align-items:center;padding:50px;gap:16px;overflow-y:auto;border-right:1px solid #2a3a50}'
+        + '.bm-modal-right{width:300px;display:flex;flex-direction:column;overflow:hidden;background:#131b2b;padding:20px 0}'
         + '.bm-img-actual{max-width:100%;max-height:360px;border-radius:8px;object-fit:contain}'
+        + '.bm-video-actual{max-width:100%;max-height:360px;border-radius:8px;object-fit:contain}'
         + '.bm-img-placeholder{width:100%;height:280px;background:#0a1020;border:1px solid #2a3a50;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#3a4a5e;font-size:13px}'
         + '.bm-toolbar{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}'
-        + '.bm-toolbar button{background:#131b2b;border:1px solid #2a3a50;color:#b0bdd0;padding:5px 10px;border-radius:5px;font-size:11px;cursor:pointer}'
+        + '.bm-toolbar button{background:#131b2b;border:1px solid #2a3a50;color:#b0bdd0;padding:10px 14px;border-radius:5px;font-size:11px;cursor:pointer}'
         + '.bm-toolbar button:hover{background:#1a2540}'
         + '.bm-actions{display:flex;gap:8px;justify-content:center}'
         + '.bm-actions.hidden{display:none}'
-        + '.bm-btn-approve{background:#1e7a35;color:#fff;border:none;padding:8px 20px;border-radius:5px;font-size:12px;font-weight:600;cursor:pointer}'
-        + '.bm-btn-reject{background:#c53030;color:#fff;border:none;padding:8px 20px;border-radius:5px;font-size:12px;font-weight:600;cursor:pointer}'
+        + '.bm-btn-approve{background:#1e7a35;color:#fff;border:none;padding:10px 24px;border-radius:5px;font-size:12px;font-weight:600;cursor:pointer}'
+        + '.bm-btn-reject{background:#c53030;color:#fff;border:none;padding:10px 24px;border-radius:5px;font-size:12px;font-weight:600;cursor:pointer}'
         + '.bm-status{display:none;align-items:center;justify-content:center;gap:12px}'
         + '.bm-status.visible{display:flex}'
         + '.bm-btn-undo{background:#1a2540;color:#b0bdd0;border:1px solid #2a3a50;padding:4px 10px;border-radius:4px;font-size:10px;cursor:pointer}'
@@ -486,7 +520,7 @@
         + '.bm-comment-input input{width:100%;background:#080d1a;border:1px solid #1a2436;border-radius:5px;padding:8px 10px;color:#b0bdd0;font-size:11px;outline:none}'
         + '.bm-btn-post{background:#2563a8;color:#fff;border:none;padding:8px 14px;border-radius:5px;font-size:11px;cursor:pointer;font-weight:500;width:100%}'
         + '.bm-btn-post:hover{background:#3b7fd4}'
-        + '.bm-modal-footer{display:flex;align-items:center;gap:12px;padding:8px 20px;border-top:1px solid #2a3a50;background:#1a2540}'
+        + '.bm-modal-footer{display:flex;align-items:center;gap:12px;padding:12px 24px;border-top:1px solid #2a3a50;background:#1a2540}'
         + '.bm-role-notice{display:none}'
         + '.bm-role-notice.visible{display:block}'
         + '.bm-role-notice p{font-size:10px;color:#6b7a8f;font-style:italic}'
