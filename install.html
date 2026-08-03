@@ -76,7 +76,7 @@ h1 { font-size: 28px; color: #fff; margin-bottom: 8px; }
     </div>
 
     <!-- The actual bookmarklet link — drag this to bookmarks bar -->
-    <a class="bookmarklet-link" href="javascript:void((function(){if(document.getElementById('approval-ui-overlay')){document.getElementById('approval-ui-overlay').remove();return;}var s=document.createElement('script');s.id='approval-ui-script';s.src='bookmarklet-source.js';document.body.appendChild(s);})())">
+    <a class="bookmarklet-link" href="javascript:void((function(){if(document.getElementById('approval-ui-overlay')){document.getElementById('approval-ui-overlay').remove();var s=document.getElementById('approval-ui-styles');if(s)s.remove();return;}var sc=document.createElement('script');sc.id='approval-ui-script';sc.src='https://ginnymones.github.io/wb-newapprovalui-bookmarklet/bookmarklet-source.js?v='+Date.now();document.body.appendChild(sc);})())">
         ⚡ Approval System UI
     </a>
 
@@ -88,7 +88,7 @@ h1 { font-size: 28px; color: #fff; margin-bottom: 8px; }
 <div class="alt-section">
     <h3>Alternative: Manual Install</h3>
     <p style="font-size:13px;color:#7a8a9e;margin-bottom:12px">Create a new bookmark and paste this as the URL:</p>
-    <div class="code-box" id="codeBox">javascript:void((function(){if(document.getElementById('approval-ui-overlay')){document.getElementById('approval-ui-overlay').remove();return;}var s=document.createElement('script');s.id='approval-ui-script';s.src='bookmarklet-source.js';document.body.appendChild(s);})())</div>
+    <div class="code-box" id="codeBox">javascript:void((function(){if(document.getElementById('approval-ui-overlay')){document.getElementById('approval-ui-overlay').remove();var s=document.getElementById('approval-ui-styles');if(s)s.remove();return;}var sc=document.createElement('script');sc.id='approval-ui-script';sc.src='https://ginnymones.github.io/wb-newapprovalui-bookmarklet/bookmarklet-source.js?v='+Date.now();document.body.appendChild(sc);})())</div>
     <button class="copy-btn" onclick="navigator.clipboard.writeText(document.getElementById('codeBox').textContent);this.textContent='Copied!';setTimeout(()=>this.textContent='Copy to clipboard',2000)">Copy to clipboard</button>
 </div>
 

@@ -49,7 +49,7 @@ A **bookmarklet** is a bookmark in your browser whose URL is a snippet of JavaSc
 For easier updates, the bookmarklet can be a tiny loader that fetches the latest version of the UI script from a hosted URL (e.g., an S3 bucket or internal CDN):
 
 ```javascript
-javascript:void((function(){var s=document.createElement('script');s.src='https://your-internal-cdn.com/approval-ui.js?v='+Date.now();document.body.appendChild(s);})())
+javascript:void((function(){var s=document.createElement('script');s.src='https://ginnymones.github.io/wb-newapprovalui-bookmarklet/bookmarklet-source.js?v='+Date.now();document.body.appendChild(s);})())
 ```
 
 This way you update the hosted file and all users get the latest version automatically.
